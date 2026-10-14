@@ -1,7 +1,10 @@
+const path = require("node:path");
+
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/style.css": "style.css" });
   eleventyConfig.addPassthroughCopy({ "src/CNAME": "CNAME" });
   eleventyConfig.addPassthroughCopy({ "src/robots.txt": "robots.txt" });
+  eleventyConfig.addPassthroughCopy({ [path.resolve("assets")]: "assets" });
 
   eleventyConfig.addFilter("getItem", (items, index) => {
     if (!Array.isArray(items) || index < 0 || index >= items.length) return null;
@@ -19,7 +22,7 @@ module.exports = function (eleventyConfig) {
       input: "src",
       includes: "_includes",
       data: "_data",
-      output: "."
+      output: "_site"
     },
     templateFormats: ["njk", "xml"],
     htmlTemplateEngine: "njk",
