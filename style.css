@@ -21,7 +21,6 @@ main.wrap { display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:28px; m
 .post-card h2 a { text-decoration:none; }
 .post-card h2 a:hover { text-decoration:underline; }
 .post-excerpt { display:-webkit-box; margin:0; overflow:hidden; color:#555; font-size:.9rem; line-height:1.55; -webkit-box-orient:vertical; -webkit-line-clamp:3; }
-.date { color:var(--muted); font-size:.78rem; }
 .article-header { margin-bottom:28px; padding-bottom:18px; border-bottom:1px solid var(--line); }
 .article-title { margin:8px 0 0; font-size:clamp(1.65rem,4vw,2.35rem); font-weight:600; line-height:1.45; }
 .entry-content { font-size:1rem; }
