@@ -1,0 +1,4 @@
+{% extends "layouts/base.njk" %}
+{% block content %}
+<article><header class="article-header"><h1 class="article-title">{{ pageData.title | escape }}</h1></header><div class="entry-content">{{ pageData.content | safe }}</div></article>
+{% endblock %}

@@ -1,0 +1,11 @@
+---
+pagination:
+  data: postPages
+  size: 1
+  alias: items
+layout: layouts/base.njk
+title: 記事一覧
+section: 記事一覧
+permalink: "page/{{ pagination.pageNumber + 2 }}/index.html"
+---
+<h1 class="section-title">最近の記事</h1>{% set currentPage = pagination.pageNumber + 2 %}{% set totalPages = postPages.length + 1 %}{% include "partials/post-list.njk" %}{% include "partials/pagination.njk" %}

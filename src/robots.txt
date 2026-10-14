@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Sitemap: https://yuzu.step13.cc/sitemap.xml
+

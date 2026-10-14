@@ -1,0 +1,5 @@
+---
+permalink: sitemap.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://yuzu.step13.cc/</loc></url>{% for pageData in pages %}<url><loc>https://yuzu.step13.cc/{{ pageData.slug }}/</loc></url>{% endfor %}{% for post in posts %}<url><loc>https://yuzu.step13.cc/{{ post.slug }}/</loc></url>{% endfor %}</urlset>

@@ -1,0 +1,1 @@
+<nav class="pagination" aria-label="ページ">{% for number in (1 | range(totalPages)) %}{% if number == currentPage %}<span class="current">{{ number }}</span>{% else %}{% if number == 1 %}<a href="/">{{ number }}</a>{% else %}<a href="/page/{{ number }}/">{{ number }}</a>{% endif %}{% endif %}{% endfor %}</nav>

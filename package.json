@@ -1,0 +1,12 @@
+{
+  "name": "yasezuni-static-site",
+  "private": true,
+  "scripts": {
+    "build": "eleventy",
+    "start": "eleventy --serve",
+    "migrate-data": "node scripts/extract-eleventy-data.mjs"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.1.6"
+  }
+}

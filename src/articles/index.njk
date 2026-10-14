@@ -1,0 +1,10 @@
+---
+pagination:
+  data: posts
+  size: 1
+  alias: post
+layout: layouts/article.njk
+section: 記事
+permalink: "{{ post.slug }}/index.html"
+---
+{{ post.content | safe }}
