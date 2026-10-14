@@ -2,8 +2,10 @@
   "name": "yasezuni-static-site",
   "private": true,
   "scripts": {
-    "build": "eleventy",
-    "start": "eleventy --serve",
+    "build": "npm run check:images && npm run prepare:publication && eleventy",
+    "check:images": "node scripts/check-image-uniqueness.mjs",
+    "prepare:publication": "node scripts/build-publication-data.mjs",
+    "start": "npm run prepare:publication && eleventy --serve",
     "migrate-data": "node scripts/extract-eleventy-data.mjs"
   },
   "devDependencies": {

@@ -3,6 +3,8 @@ name: Build and deploy Eleventy site
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: "0 18 * * *"
   workflow_dispatch:
 
 permissions:

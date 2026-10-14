@@ -22,6 +22,19 @@ function decodeHtml(value) {
     .replace(/&#39;/g, "'");
 }
 
+const japaneseTextChars = "ぁ-んァ-ヶ一-龯々ー！？。、，．：；）】〉》」』〕］｝（【〈《「『〔［｛";
+const lineWrapSpace = new RegExp(`(?<=[${japaneseTextChars}]) | (?=[${japaneseTextChars}])`, "g");
+
+function normalizeArticleText(value) {
+  return value.replaceAll("メルマガ", "サイト").replace(lineWrapSpace, "");
+}
+
+function normalizeArticleHtml(value) {
+  return value.split(/(<[^>]*>)/g)
+    .map((part) => part.startsWith("<") ? part : normalizeArticleText(part))
+    .join("");
+}
+
 function extractEntry(html, withArticleNav = false) {
   const startTag = "<div class='entry-content'>";
   const start = html.indexOf(startTag);
@@ -50,8 +63,8 @@ function extractCards(html) {
     const slug = decodeURIComponent(match[1].replace(/^\//, "").replace(/\/$/, ""));
     cards.push({
       slug,
-      title: decodeHtml(title[1]),
-      excerpt: decodeHtml(excerpt[1]),
+      title: normalizeArticleText(decodeHtml(title[1])),
+      excerpt: normalizeArticleText(decodeHtml(excerpt[1])),
       image: image ? `/${image[1].replace(/^\//, "")}` : ""
     });
   }
@@ -76,10 +89,10 @@ for (const card of cards) {
   const html = read(articlePath(card.slug));
   posts.push({
     slug: card.slug,
-    title: extractTitle(html),
+    title: normalizeArticleText(extractTitle(html)),
     excerpt: card.excerpt,
     image: card.image,
-    content: extractEntry(html, true)
+    content: normalizeArticleHtml(extractEntry(html, true))
   });
 }
 
