@@ -5,6 +5,7 @@
     "build": "npm run check:images && npm run prepare:publication && eleventy",
     "check:images": "node scripts/check-image-uniqueness.mjs",
     "prepare:publication": "node scripts/build-publication-data.mjs",
+    "release:publication": "node scripts/release-next-posts.mjs",
     "start": "npm run prepare:publication && eleventy --serve",
     "migrate-data": "node scripts/extract-eleventy-data.mjs"
   },

@@ -2,13 +2,7 @@ import fs from "node:fs";
 
 const dataDir = new URL("../src/_data/", import.meta.url);
 const posts = JSON.parse(fs.readFileSync(new URL("posts.json", dataDir), "utf8"));
-const now = Date.now();
-
-const publishedPosts = posts.filter((post) => {
-  if (!post.publishAt) return true;
-  const publishTime = Date.parse(post.publishAt);
-  return Number.isNaN(publishTime) || publishTime <= now;
-});
+const publishedPosts = posts.filter((post) => post.published === true);
 
 const publishedHomePosts = publishedPosts.slice(0, 10);
 const publishedPostPages = [];
