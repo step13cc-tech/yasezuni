@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>記事プレビュー・確認</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="dashboard-header">
+    <div>
+      <p class="eyebrow">やせずに幸せモテ女</p>
+      <h1>記事プレビュー・確認</h1>
+      <nav class="view-tabs" aria-label="記事状態の切り替え">
+        <a id="preview-tab" href="/?status=preview-wait">プレビュー待ち</a>
+        <a id="public-wait-tab" href="/?status=public-wait">公開待ち</a>
+      </nav>
+    </div>
+    <div class="status-summary">
+      <span><strong id="preview-count">0</strong>件のプレビュー待ち</span>
+      <span><strong id="public-wait-count">0</strong>件の公開待ち</span>
+      <div class="summary-group" aria-label="公開済みの内訳">
+        <span class="summary-group-title"><strong id="published-count">0</strong>件の公開済み</span>
+        <span class="summary-detail"><strong id="published-reflected-count">0</strong>件：公開サイト反映済み</span>
+        <span class="summary-detail"><strong id="published-unreflected-count">0</strong>件：未反映</span>
+      </div>
+    </div>
+  </header>
+  <p class="publication-note">「公開済み」の内訳として、GitHub側で公開済みの記事を「公開サイト反映済み」、ローカルで公開済みだがGitHub側で未公開の記事を「未反映」と表示しています。午前3時の自動公開後は、GitHub側がこのパソコンより先行する場合があります。GitHub Actionsの実行中は反映まで数分かかる場合があります。</p>
+
+  <main class="dashboard-grid">
+    <aside class="article-list-panel">
+      <div class="panel-heading">
+        <h2 id="list-heading">プレビュー待ち</h2>
+        <button id="refresh-button" type="button">更新</button>
+      </div>
+      <p id="list-help" class="help-text">記事を選ぶと、右側で内容を確認・修正できます。</p>
+      <div id="article-list" class="article-list"></div>
+    </aside>
+
+    <section class="editor-panel" aria-live="polite">
+      <div id="empty-state" class="empty-state">
+        <h2>記事を選択してください</h2>
+        <p>プレビュー待ちの記事がここに表示されます。</p>
+      </div>
+
+      <div id="editor-view" hidden>
+        <div class="editor-heading">
+          <div>
+            <p id="article-date" class="article-date"></p>
+            <p class="help-text">ここで加筆・修正した内容は、保存後も公開サイトには出ません。</p>
+          </div>
+          <div class="editor-actions">
+            <span id="save-status" class="save-status" role="status" aria-live="polite"></span>
+            <button id="save-button" class="button secondary" type="button">修正を保存</button>
+            <button id="approve-button" class="button primary" type="button">OKにして公開待ちへ</button>
+            <button id="move-to-preview-button" class="button secondary" type="button">プレビュー待ちに戻す</button>
+            <button id="publish-now-button" class="button publish-now" type="button">今すぐ公開にする</button>
+          </div>
+        </div>
+
+        <label class="field-label" for="title-editor">タイトル</label>
+        <input id="title-editor" class="title-editor" type="text">
+
+        <div class="preview-layout">
+          <div>
+            <label class="field-label" for="content-editor">本文（クリックして編集）</label>
+            <div id="content-editor" class="content-editor" contenteditable="true" spellcheck="false"></div>
+          </div>
+          <article class="article-preview">
+            <p class="field-label">表示プレビュー</p>
+            <img id="preview-image" class="preview-image" alt="">
+            <h2 id="preview-title"></h2>
+            <div id="preview-content" class="preview-content"></div>
+          </article>
+        </div>
+        <p id="message" class="message" role="status"></p>
+      </div>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

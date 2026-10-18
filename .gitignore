@@ -4,3 +4,5 @@ _site/
 src/_data/publishedPosts.json
 src/_data/publishedHomePosts.json
 src/_data/publishedPostPages.json
+src/_data/publicWaitPosts.json
+src/_data/previewPosts.json

@@ -2,7 +2,8 @@ import fs from "node:fs";
 
 const dataPath = new URL("../src/_data/posts.json", import.meta.url);
 const posts = JSON.parse(fs.readFileSync(dataPath, "utf8"));
-const unpublished = posts.filter((post) => post.published !== true);
+const statusOf = (post) => post.reviewStatus ?? (post.published === true ? "published" : "public-wait");
+const unpublished = posts.filter((post) => post.published !== true && statusOf(post) === "public-wait");
 const batch = [...unpublished]
   .sort((a, b) => {
     const aTime = Number.isFinite(a._sortTimestamp) ? a._sortTimestamp : Number.MAX_SAFE_INTEGER;
@@ -18,6 +19,7 @@ if (batch.length === 0) {
 
 for (const post of batch) {
   post.published = true;
+  post.reviewStatus = "published";
 }
 
 fs.writeFileSync(dataPath, `${JSON.stringify(posts, null, 2)}\n`);

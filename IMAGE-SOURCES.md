@@ -121,3 +121,22 @@
 - Photographer: Fethi Benattallah
 - License: [Unsplash License](https://unsplash.com/license)
 - Downloaded: 2026-10-14
+
+## 2011年1月追加・プレビュー待ち
+
+以下の10枚は、今回追加したプレビュー待ち記事へ1枚ずつ割り当てています。既存記事とは重複しない画像です。
+
+| ファイル | 記事 | 出典 |
+| --- | --- | --- |
+| `mag-direct-conversation.jpg` | 直接向き合う | [Unsplash](https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80) |
+| `mag-honesty.jpg` | 嘘 | [Unsplash](https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&w=1200&q=80) |
+| `mag-everyday-life.jpg` | あたりまえって難しい | [Unsplash](https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1200&q=80) |
+| `mag-relaxed-smile.jpg` | なんとなぁーくが最高です。 | [Unsplash](https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80) |
+| `mag-thinking-question.jpg` | 「なんで？？」 | [Unsplash](https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=1200&q=80) |
+| `mag-couple-connection.jpg` | 恋愛は相手があることなので | [Unsplash](https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80) |
+| `mag-waiting.jpg` | 「待ってて」や「待っているよ」 | [Unsplash](https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80) |
+| `mag-choice-notebook.jpg` | 「彼氏ができない100の理由 | [Unsplash](https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&w=1200&q=80) |
+| `mag-confident-man.jpg` | 男らしいと勘違いさせる男 | [Unsplash](https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1200&q=80) |
+| `mag-supportive-friends.jpg` | いろんな場合においていい男の条件 | [Unsplash](https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80) |
+
+利用条件は[Unsplash License](https://unsplash.com/license)に従います。

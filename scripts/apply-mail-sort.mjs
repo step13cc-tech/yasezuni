@@ -120,7 +120,7 @@ function subjectTitle(subject) {
 }
 
 function isExcluded(subject) {
-  return /(?:メール|メルマガ)公開相談/.test(compact(subject));
+  return /公開相談/.test(compact(subject));
 }
 
 function bodySnippets(post) {

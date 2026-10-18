@@ -6,6 +6,13 @@
     "check:images": "node scripts/check-image-uniqueness.mjs",
     "prepare:publication": "node scripts/build-publication-data.mjs",
     "release:publication": "node scripts/release-next-posts.mjs",
+    "list:preview": "node scripts/list-workflow-posts.mjs preview-wait",
+    "list:public-wait": "node scripts/list-workflow-posts.mjs public-wait",
+    "list:mail-candidates": "node scripts/list-mail-candidates.mjs",
+    "create:preview-articles": "node scripts/create-next-preview-articles.mjs",
+    "approve:preview": "node scripts/approve-preview-post.mjs",
+    "preview": "node scripts/preview-site.mjs",
+    "review": "node scripts/review-dashboard.mjs",
     "start": "npm run prepare:publication && eleventy --serve",
     "migrate-data": "node scripts/extract-eleventy-data.mjs"
   },

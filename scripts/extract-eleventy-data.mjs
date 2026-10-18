@@ -83,16 +83,28 @@ for (let pageNumber = 2; fs.existsSync(path.join(root, "page", String(pageNumber
 const cards = listingFiles.flatMap((file) => extractCards(read(file)));
 const seen = new Set();
 const posts = [];
+const existingPostsPath = path.join(dataDir, "posts.json");
+const existingPosts = fs.existsSync(existingPostsPath)
+  ? JSON.parse(read(existingPostsPath))
+  : [];
+const existingBySlug = new Map(existingPosts.map((post) => [post.slug, post]));
+const initialExtraction = existingPosts.length === 0;
 for (const card of cards) {
   if (seen.has(card.slug)) continue;
   seen.add(card.slug);
   const html = read(articlePath(card.slug));
+  const previous = existingBySlug.get(card.slug);
   posts.push({
     slug: card.slug,
     title: normalizeArticleText(extractTitle(html)),
     excerpt: card.excerpt,
     image: card.image,
-    content: normalizeArticleHtml(extractEntry(html, true))
+    content: normalizeArticleHtml(extractEntry(html, true)),
+    ...(previous
+      ? { published: previous.published, reviewStatus: previous.reviewStatus }
+      : initialExtraction
+        ? { published: true }
+        : { published: false, reviewStatus: "preview-wait" })
   });
 }
 
