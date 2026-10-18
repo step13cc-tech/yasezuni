@@ -38,9 +38,10 @@ function publicationCounts(posts) {
     const status = statusOf(post);
     if (status === "preview-wait") counts.previewWait += 1;
     if (status === "public-wait") counts.publicWait += 1;
+    if (status === "rejected") counts.rejected += 1;
     if (status === "published") counts.published += 1;
     return counts;
-  }, { previewWait: 0, publicWait: 0, published: 0 });
+  }, { previewWait: 0, publicWait: 0, rejected: 0, published: 0 });
   const remotePosts = readRemotePosts();
   if (!remotePosts) return { ...result, repositoryComparisonAvailable: false };
   const remotePublished = new Set(remotePosts.filter((post) => statusOf(post) === "published").map((post) => post.slug));
@@ -112,7 +113,7 @@ function publicPost(post, includeContent = false) {
 }
 
 function postFromPath(pathname) {
-  const match = pathname.match(/^\/api\/posts\/(.+?)(?:\/(?:approve|publish|preview))?\/?$/);
+  const match = pathname.match(/^\/api\/posts\/(.+?)(?:\/(?:approve|publish|preview|reject))?\/?$/);
   return match ? decodeURIComponent(match[1]) : null;
 }
 
@@ -122,6 +123,10 @@ function isApprovePath(pathname) {
 
 function isPublishPath(pathname) {
   return /^\/api\/posts\/.+\/publish\/?$/.test(pathname);
+}
+
+function isRejectPath(pathname) {
+  return /^\/api\/posts\/.+\/reject\/?$/.test(pathname);
 }
 
 function isPreviewPath(pathname) {
@@ -211,6 +216,19 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
+    if (url.pathname.startsWith("/api/posts/") && request.method === "POST" && isRejectPath(url.pathname)) {
+      const slug = postFromPath(url.pathname);
+      const posts = readPosts();
+      const post = posts.find((item) => item.slug === slug);
+      if (!post) return sendJson(response, 404, { error: "記事が見つかりません。" });
+      if (statusOf(post) !== "preview-wait") return sendJson(response, 409, { error: "プレビュー待ちの記事だけを不採用にできます。" });
+      post.published = false;
+      post.reviewStatus = "rejected";
+      writePosts(posts);
+      sendJson(response, 200, publicPost(post, true));
+      return;
+    }
+
     if (url.pathname.startsWith("/api/posts/") && request.method === "POST" && isPublishPath(url.pathname)) {
       const slug = postFromPath(url.pathname);
       const posts = readPosts();
@@ -229,7 +247,7 @@ const server = http.createServer(async (request, response) => {
       const posts = readPosts();
       const post = posts.find((item) => item.slug === slug);
       if (!post) return sendJson(response, 404, { error: "記事が見つかりません。" });
-      if (statusOf(post) !== "public-wait") return sendJson(response, 409, { error: "公開待ちの記事だけをプレビュー待ちに戻せます。" });
+      if (statusOf(post) !== "public-wait" && statusOf(post) !== "rejected") return sendJson(response, 409, { error: "公開待ちまたは不採用の記事だけをプレビュー待ちに戻せます。" });
       post.published = false;
       post.reviewStatus = "preview-wait";
       writePosts(posts);

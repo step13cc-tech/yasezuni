@@ -1,15 +1,18 @@
 const list = document.querySelector("#article-list");
 const count = document.querySelector("#preview-count");
 const publicWaitCount = document.querySelector("#public-wait-count");
+const rejectedCount = document.querySelector("#rejected-count");
 const publishedCount = document.querySelector("#published-count");
 const publishedReflectedCount = document.querySelector("#published-reflected-count");
 const publishedUnreflectedCount = document.querySelector("#published-unreflected-count");
-const viewStatus = new URLSearchParams(window.location.search).get("status") === "public-wait" ? "public-wait" : "preview-wait";
-const readOnly = viewStatus === "public-wait";
+const requestedStatus = new URLSearchParams(window.location.search).get("status");
+const viewStatus = ["preview-wait", "public-wait", "rejected"].includes(requestedStatus) ? requestedStatus : "preview-wait";
+const readOnly = viewStatus !== "preview-wait";
 const listHeading = document.querySelector("#list-heading");
 const listHelp = document.querySelector("#list-help");
 const previewTab = document.querySelector("#preview-tab");
 const publicWaitTab = document.querySelector("#public-wait-tab");
+const rejectedTab = document.querySelector("#rejected-tab");
 const emptyState = document.querySelector("#empty-state");
 const editorView = document.querySelector("#editor-view");
 const titleEditor = document.querySelector("#title-editor");
@@ -21,6 +24,7 @@ const articleDate = document.querySelector("#article-date");
 const message = document.querySelector("#message");
 const saveButton = document.querySelector("#save-button");
 const saveStatus = document.querySelector("#save-status");
+const rejectButton = document.querySelector("#reject-button");
 const approveButton = document.querySelector("#approve-button");
 const moveToPreviewButton = document.querySelector("#move-to-preview-button");
 const publishNowButton = document.querySelector("#publish-now-button");
@@ -43,20 +47,26 @@ function showSaveStatus(text, type = "") {
 }
 
 function configureView() {
-  listHeading.textContent = readOnly ? "公開待ち" : "プレビュー待ち";
-  listHelp.textContent = readOnly
+  const viewLabel = viewStatus === "public-wait" ? "公開待ち" : viewStatus === "rejected" ? "不採用" : "プレビュー待ち";
+  listHeading.textContent = viewLabel;
+  listHelp.textContent = viewStatus === "public-wait"
     ? "記事を選ぶと、公開前の内容を確認できます。「今すぐ公開にする」で個別公開できます。"
-    : "記事を選ぶと、右側で内容を確認・修正できます。";
+    : viewStatus === "rejected"
+      ? "不採用にした記事の一覧です。必要な場合はプレビュー待ちに戻せます。"
+      : "記事を選ぶと、右側で内容を確認・修正できます。";
+  emptyState.querySelector("p").textContent = `${viewLabel}の記事がここに表示されます。`;
   document.querySelector("#content-editor").previousElementSibling.textContent = readOnly ? "本文（読み取り専用）" : "本文（クリックして編集）";
   saveButton.hidden = readOnly;
+  rejectButton.hidden = readOnly;
   approveButton.hidden = readOnly;
-  moveToPreviewButton.hidden = !readOnly;
-  publishNowButton.hidden = !readOnly;
+  moveToPreviewButton.hidden = viewStatus !== "public-wait" && viewStatus !== "rejected";
+  publishNowButton.hidden = viewStatus !== "public-wait";
   saveStatus.hidden = readOnly;
   titleEditor.readOnly = readOnly;
   contentEditor.contentEditable = String(!readOnly);
   previewTab.classList.toggle("active", !readOnly);
-  publicWaitTab.classList.toggle("active", readOnly);
+  publicWaitTab.classList.toggle("active", viewStatus === "public-wait");
+  rejectedTab.classList.toggle("active", viewStatus === "rejected");
 }
 
 function updatePreview() {
@@ -67,7 +77,8 @@ function updatePreview() {
 function renderList(posts) {
   list.replaceChildren();
   if (!posts.length) {
-    list.innerHTML = `<p class="empty-list">現在、${readOnly ? "公開待ち" : "プレビュー待ち"}の記事はありません。</p>`;
+    const viewLabel = viewStatus === "public-wait" ? "公開待ち" : viewStatus === "rejected" ? "不採用" : "プレビュー待ち";
+    list.innerHTML = `<p class="empty-list">現在、${viewLabel}の記事はありません。</p>`;
     return;
   }
   for (const post of posts) {
@@ -91,6 +102,7 @@ async function loadCounts() {
     const data = await response.json();
     count.textContent = data.previewWait;
     publicWaitCount.textContent = data.publicWait;
+    rejectedCount.textContent = data.rejected;
     publishedCount.textContent = data.published;
     publishedReflectedCount.textContent = data.repositoryComparisonAvailable ? data.publishedReflected : "確認不可";
     publishedUnreflectedCount.textContent = data.repositoryComparisonAvailable ? data.publishedUnreflected : "確認不可";
@@ -98,19 +110,22 @@ async function loadCounts() {
   }
 
   // 起動中の古いレビューサーバーにも対応するため、両方の一覧から件数を求める。
-  const [previewResponse, publicWaitResponse, publishedResponse] = await Promise.all([
+  const [previewResponse, publicWaitResponse, rejectedResponse, publishedResponse] = await Promise.all([
     fetch("/api/posts?status=preview-wait"),
     fetch("/api/posts?status=public-wait"),
+    fetch("/api/posts?status=rejected"),
     fetch("/api/posts?status=published")
   ]);
   const previewData = await previewResponse.json();
   const publicWaitData = await publicWaitResponse.json();
+  const rejectedData = await rejectedResponse.json();
   const publishedData = await publishedResponse.json();
-  if (!previewResponse.ok || !publicWaitResponse.ok || !publishedResponse.ok) {
-    throw new Error(previewData.error || publicWaitData.error || publishedData.error || "件数を読み込めませんでした。");
+  if (!previewResponse.ok || !publicWaitResponse.ok || !rejectedResponse.ok || !publishedResponse.ok) {
+    throw new Error(previewData.error || publicWaitData.error || rejectedData.error || publishedData.error || "件数を読み込めませんでした。");
   }
   count.textContent = previewData.posts.length;
   publicWaitCount.textContent = publicWaitData.posts.length;
+  rejectedCount.textContent = rejectedData.posts.length;
   publishedCount.textContent = publishedData.posts.length;
   publishedReflectedCount.textContent = "確認不可";
   publishedUnreflectedCount.textContent = "確認不可";
@@ -198,6 +213,27 @@ async function approvePost() {
   await loadPosts(false);
 }
 
+async function rejectPost() {
+  if (!currentSlug || readOnly) return;
+  if (!window.confirm("この記事を不採用にしますか？\n\n不採用にした記事は公開待ちへ移動せず、公開サイトにも掲載されません。")) return;
+  rejectButton.disabled = true;
+  rejectButton.textContent = "処理中…";
+  try {
+    const response = await fetch(`/api/posts/${encodeURIComponent(currentSlug)}/reject`, { method: "POST" });
+    const result = await response.json();
+    if (!response.ok) return showMessage(result.error || "不採用に変更できませんでした。", "error");
+    currentSlug = "";
+    currentPost = null;
+    await loadPosts(false);
+    showMessage("不採用として保存しました。", "success");
+  } catch (error) {
+    showMessage(error.message || "不採用に変更できませんでした。", "error");
+  } finally {
+    rejectButton.disabled = false;
+    rejectButton.textContent = "不採用にする";
+  }
+}
+
 async function publishPostNow() {
   if (!currentSlug || !readOnly) return;
   if (!window.confirm("この記事を公開済みに変更しますか？\n\n変更後、GitHub Desktopでコミット・プッシュすると公開サイトに反映されます。")) return;
@@ -220,8 +256,11 @@ async function publishPostNow() {
 }
 
 async function movePostToPreview() {
-  if (!currentSlug || !readOnly) return;
-  if (!window.confirm("この記事をプレビュー待ちに戻しますか？")) return;
+  if (!currentSlug || !readOnly || viewStatus === "preview-wait") return;
+  const confirmation = viewStatus === "rejected"
+    ? "この記事を不採用から取り消して、プレビュー待ちに戻しますか？"
+    : "この記事をプレビュー待ちに戻しますか？";
+  if (!window.confirm(confirmation)) return;
   moveToPreviewButton.disabled = true;
   moveToPreviewButton.textContent = "移動中…";
   try {
@@ -249,6 +288,7 @@ function markUnsaved() {
 titleEditor.addEventListener("input", markUnsaved);
 contentEditor.addEventListener("input", markUnsaved);
 saveButton.addEventListener("click", savePost);
+rejectButton.addEventListener("click", rejectPost);
 approveButton.addEventListener("click", approvePost);
 moveToPreviewButton.addEventListener("click", movePostToPreview);
 publishNowButton.addEventListener("click", publishPostNow);

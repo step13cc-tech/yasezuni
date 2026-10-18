@@ -14,11 +14,13 @@
       <nav class="view-tabs" aria-label="記事状態の切り替え">
         <a id="preview-tab" href="/?status=preview-wait">プレビュー待ち</a>
         <a id="public-wait-tab" href="/?status=public-wait">公開待ち</a>
+        <a id="rejected-tab" href="/?status=rejected">不採用</a>
       </nav>
     </div>
     <div class="status-summary">
       <span><strong id="preview-count">0</strong>件のプレビュー待ち</span>
       <span><strong id="public-wait-count">0</strong>件の公開待ち</span>
+      <span><strong id="rejected-count">0</strong>件の不採用</span>
       <div class="summary-group" aria-label="公開済みの内訳">
         <span class="summary-group-title"><strong id="published-count">0</strong>件の公開済み</span>
         <span class="summary-detail"><strong id="published-reflected-count">0</strong>件：公開サイト反映済み</span>
@@ -53,6 +55,7 @@
           <div class="editor-actions">
             <span id="save-status" class="save-status" role="status" aria-live="polite"></span>
             <button id="save-button" class="button secondary" type="button">修正を保存</button>
+            <button id="reject-button" class="button reject" type="button">不採用にする</button>
             <button id="approve-button" class="button primary" type="button">OKにして公開待ちへ</button>
             <button id="move-to-preview-button" class="button secondary" type="button">プレビュー待ちに戻す</button>
             <button id="publish-now-button" class="button publish-now" type="button">今すぐ公開にする</button>

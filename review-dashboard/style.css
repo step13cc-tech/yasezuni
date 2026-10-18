@@ -56,6 +56,8 @@ h2 { margin: 0; font-size: 1.1rem; }
 .button.secondary { color: var(--ink); background: #e4ebec; }
 .button.primary { color: white; background: var(--accent); }
 .button.primary:hover { background: var(--accent-dark); }
+.button.reject { color: white; background: #8a5365; }
+.button.reject:hover { background: #704153; }
 .button.publish-now { color: white; background: var(--danger); }
 .button.publish-now:hover { background: #8f2f3a; }
 .field-label { display: block; margin: 0 0 7px; color: var(--muted); font-size: .82rem; font-weight: 700; }

@@ -140,3 +140,42 @@
 | `mag-supportive-friends.jpg` | いろんな場合においていい男の条件 | [Unsplash](https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80) |
 
 利用条件は[Unsplash License](https://unsplash.com/license)に従います。
+
+## 2011年2〜3月追加・プレビュー待ち
+
+以下の30枚は、今回追加したプレビュー待ち記事へ日付順に1枚ずつ割り当てています。既存記事と画像が重複しないことを確認済みです。すべてUnsplashの画像URLから取得しています。
+
+| ファイル | 記事 | 出典 |
+| --- | --- | --- |
+| `mag-next-01.jpg` | 『バレンタインテーマリクエスト』大募集 | [Unsplash](https://images.unsplash.com/photo-1511632765486-a01980e01a18) |
+| `mag-next-02.jpg` | きっとあなたのことを好きだったはず | [Unsplash](https://images.unsplash.com/photo-1527529482837-4698179dc6ce) |
+| `mag-next-03.jpg` | チョコにカード（好き以外）を添えるのはどうですか？ | [Unsplash](https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a) |
+| `mag-next-04.jpg` | バレンタインの告白を逃すと他の女に奪われませんか？ | [Unsplash](https://images.unsplash.com/photo-1506869640319-fe1a24fd76dc) |
+| `mag-next-05.jpg` | モノだけよりチョコもあげた方がいいのでしょうか？ | [Unsplash](https://images.unsplash.com/photo-1517457373958-b7bdd4587205) |
+| `mag-next-06.jpg` | 自分の恋愛に必要なのは応用力 | [Unsplash](https://images.unsplash.com/photo-1532629345422-7515f3d16bb6) |
+| `mag-next-07.jpg` | 好きな人にチョコをあげないと脈なしと思われないか | [Unsplash](https://images.unsplash.com/photo-1504159506876-f8338247a14a) |
+| `mag-next-08.jpg` | 同じ辛いなら | [Unsplash](https://images.unsplash.com/photo-1511988617509-a57c8a288659) |
+| `mag-next-09.jpg` | 義理チョコをあげる注意点（本命と区別する方法は？） | [Unsplash](https://images.unsplash.com/photo-1500530855697-b586d89ba3ee) |
+| `mag-next-10.jpg` | ほかの女性のチョコが気になって、チョコを決められない | [Unsplash](https://images.unsplash.com/photo-1441974231531-c6227db76b6e) |
+| `mag-next-11.jpg` | 心地よい…の考え方 | [Unsplash](https://images.unsplash.com/photo-1501785888041-af3ef285b470) |
+| `mag-next-12.jpg` | 一緒に生きていく人 | [Unsplash](https://images.unsplash.com/photo-1511497584788-876760111969) |
+| `mag-next-13.jpg` | バレンタインで大事なこと | [Unsplash](https://images.unsplash.com/photo-1470770841072-f978cf4d019e) |
+| `mag-next-14.jpg` | バレンタイン終了後には | [Unsplash](https://images.unsplash.com/photo-1464822759023-fed622ff2c3b) |
+| `mag-next-15.jpg` | 正確に理解できていますか？ | [Unsplash](https://images.unsplash.com/photo-1469474968028-56623f02e42e) |
+| `mag-next-16.jpg` | イライラするのをやめるより | [Unsplash](https://images.unsplash.com/photo-1494790108377-be9c29b29330) |
+| `mag-next-17.jpg` | どのくらいの期間付き合ったか | [Unsplash](https://images.unsplash.com/photo-1488426862026-3ee34a7d66df) |
+| `mag-next-18.jpg` | 誰と結婚するのがいいのか？ | [Unsplash](https://images.unsplash.com/photo-1487412720507-e7ab37603c6f) |
+| `mag-next-19.jpg` | 自分の好きな人たちに囲まれる素敵な人生 | [Unsplash](https://images.unsplash.com/photo-1517365830460-955ce3ccd263) |
+| `mag-next-20.jpg` | 喜怒哀楽がわかりやすい人は、素直で正直な人？ | [Unsplash](https://images.unsplash.com/photo-1496440737103-cd596325d314) |
+| `mag-next-21.jpg` | リラックスタイム | [Unsplash](https://images.unsplash.com/photo-1534528741775-53994a69daeb) |
+| `mag-next-22.jpg` | 「幸せ」 | [Unsplash](https://images.unsplash.com/photo-1504593811423-6dd665756598) |
+| `mag-next-23.jpg` | 自分が望めば、変われること | [Unsplash](https://images.unsplash.com/photo-1484704849700-f032a568e944) |
+| `mag-next-24.jpg` | 別れ | [Unsplash](https://images.unsplash.com/photo-1516321318423-f06f85e504b3) |
+| `mag-next-25.jpg` | うまく行かないときこそ… | [Unsplash](https://images.unsplash.com/photo-1497366811353-6870744d04b2) |
+| `mag-next-26.jpg` | 自分の人生はそうやって切り開く | [Unsplash](https://images.unsplash.com/photo-1522202176988-66273c2fd55f) |
+| `mag-next-27.jpg` | どうなれば幸せだと思えますか？ | [Unsplash](https://images.unsplash.com/photo-1521737604893-d14cc237f11d) |
+| `mag-next-28.jpg` | 相手を喜ばすために | [Unsplash](https://images.unsplash.com/photo-1528605248644-14dd04022da1) |
+| `mag-next-29.jpg` | 困った状況に追い込まないようにするために | [Unsplash](https://images.unsplash.com/photo-1517048676732-d65bc937f952) |
+| `mag-next-30.jpg` | 前向き | [Unsplash](https://images.unsplash.com/photo-1543269865-cbf427effbad) |
+
+利用条件は[Unsplash License](https://unsplash.com/license)に従います。
