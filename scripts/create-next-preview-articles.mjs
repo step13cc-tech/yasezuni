@@ -80,18 +80,27 @@ function normalizeText(value) {
 function escapeHtml(value) {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
+function splitTextBlocks(text) {
+  const blocks = [];
+  let lines = [];
+  let blankLines = 0;
+  for (const line of text.replace(/\r/g, "").split("\n")) {
+    if (/^\s*$/.test(line)) { blankLines += 1; continue; }
+    if (lines.length && blankLines > 0) { blocks.push({ lines, blankLines }); lines = []; }
+    lines.push(line);
+    blankLines = 0;
+  }
+  if (lines.length) blocks.push({ lines, blankLines: 0 });
+  return blocks;
+}
 function textToHtml(text) {
-  const parts = text.split(/(\n{2,})/);
   const html = [];
-  for (let index = 0; index < parts.length; index += 2) {
-    const block = parts[index];
-    const normalized = normalizeText(block.replace(/\n/g, " "));
-    if (normalized) {
-      const escaped = escapeHtml(normalized).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" rel="noreferrer noopener" target="_blank">$1</a>');
-      html.push(`<p>　${escaped}</p>`);
-    }
-    const separator = parts[index + 1] || "";
-    const spacerCount = Math.max(0, Math.ceil(separator.length / 2) - 1);
+  for (const block of splitTextBlocks(text)) {
+    const normalized = normalizeText(block.lines.join(" "));
+    if (!normalized) continue;
+    const escaped = escapeHtml(normalized).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" rel="noreferrer noopener" target="_blank">$1</a>');
+    html.push(`<p>　${escaped}</p>`);
+    const spacerCount = Math.max(0, Math.ceil((block.blankLines + 1) / 2) - 1);
     for (let spacer = 0; spacer < spacerCount; spacer += 1) {
       html.push('<p class="article-spacer" aria-hidden="true">&nbsp;</p>');
     }
@@ -110,7 +119,7 @@ function extractArticleBody(body) {
   while (start < lines.length && (/^\s*$/.test(lines[start]) || /^[━=\-]{5,}\s*$/.test(lines[start]))) start += 1;
   let end = lines.length;
   for (let index = start; index < lines.length; index += 1) {
-    if (/^\s*(?:⇒|★☆|━━━━━━━━|================)/.test(lines[index])) { end = index; break; }
+    if (/^\s*(?:⇒|★☆|━━━━━━━━|================|＜やせずに幸せモテ女＞|<やせずに幸せモテ女>)/.test(lines[index])) { end = index; break; }
   }
   const content = lines.slice(start, end).join("\n").trim();
   return textToHtml(content);

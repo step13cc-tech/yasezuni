@@ -113,20 +113,30 @@ function escapeHtml(value) {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
 
+function splitTextBlocks(text) {
+  const blocks = [];
+  let lines = [];
+  let blankLines = 0;
+  for (const line of text.replace(/\r/g, "").split("\n")) {
+    if (/^\s*$/.test(line)) { blankLines += 1; continue; }
+    if (lines.length && blankLines > 0) { blocks.push({ lines, blankLines }); lines = []; }
+    lines.push(line);
+    blankLines = 0;
+  }
+  if (lines.length) blocks.push({ lines, blankLines: 0 });
+  return blocks;
+}
 function textToHtml(text) {
-  const parts = text.split(/(\n{2,})/);
   const html = [];
-  for (let index = 0; index < parts.length; index += 2) {
-    const block = parts[index];
-    const lines = block.split("\n").map((line) => normalizeText(line)).filter(Boolean);
+  for (const block of splitTextBlocks(text)) {
+    const lines = block.lines.map((line) => normalizeText(line)).filter(Boolean);
     const isQuote = lines.some((line) => /^>/.test(line));
-    const normalized = isQuote ? lines.join("<br>") : normalizeText(block.replace(/\n/g, " "));
+    const normalized = isQuote ? lines.join("<br>") : normalizeText(lines.join(" "));
     if (normalized) {
       const escaped = escapeHtml(normalized).replaceAll("&lt;br&gt;", "<br>").replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" rel="noreferrer noopener" target="_blank">$1</a>');
       html.push(`<p>　${escaped}</p>`);
     }
-    const separator = parts[index + 1] || "";
-    const spacerCount = Math.max(0, Math.ceil(separator.length / 2) - 1);
+    const spacerCount = Math.max(0, Math.ceil((block.blankLines + 1) / 2) - 1);
     for (let spacer = 0; spacer < spacerCount; spacer += 1) {
       html.push('<p class="article-spacer" aria-hidden="true">&nbsp;</p>');
     }
@@ -147,27 +157,29 @@ function extractArticleBody(body, title) {
   while (start < lines.length && (/^\s*$/.test(lines[start]) || /^[━=\-]{5,}\s*$/.test(lines[start]))) start += 1;
   let end = lines.length;
   for (let index = start; index < lines.length; index += 1) {
-    if (/^\s*(?:⇒|★☆|━━━━━━━━|================)/.test(lines[index])) { end = index; break; }
+    if (/^\s*(?:⇒|★☆|━━━━━━━━|================|＜やせずに幸せモテ女＞|<やせずに幸せモテ女>)/.test(lines[index])) { end = index; break; }
   }
   let content = lines.slice(start, end)
     .filter((line) => !/^\s*(?:配信停止|購読解除|登録解除|配信先変更)\b/.test(line))
     .join("\n")
     .trim();
   const titleText = normalizeText(title);
-  const parts = content.split(/(\n{2,})/);
+  const blocks = splitTextBlocks(content);
   const kept = [];
-  let separator = "\n\n";
-  for (let index = 0; index < parts.length; index += 2) {
-    const block = parts[index];
-    const normalized = normalizeText(block.replace(/\n/g, " "));
+  let separatorBlankLines = 1;
+  for (const block of blocks) {
+    const normalized = normalizeText(block.lines.join(" "));
+    if (!normalized) continue;
     if (normalized === titleText || /^ＨＮ.*「幸せ」$/.test(normalized)) continue;
     if (/@/.test(normalized)) continue;
     if (/^秋さん、(?:メールありがとうございました|末永くお幸せに)/.test(normalized)) continue;
-    if (kept.length) kept.push(separator);
-    kept.push(block);
-    separator = parts[index + 1] || "\n\n";
+    if (/(?:さん|氏).*(?:歳|才).*(?:リクエスト|ありがとうございました)/.test(normalized)) continue;
+    if (kept.length) kept[kept.length - 1].blankLines = separatorBlankLines;
+    kept.push({ lines: block.lines, blankLines: 0 });
+    separatorBlankLines = block.blankLines;
   }
-  content = kept.join("").replaceAll("秋さん", "相談者さん");
+  content = kept.map((block) => `${block.lines.join("\n")}${"\n".repeat(block.blankLines + 1)}`).join("").trim();
+  content = content.replaceAll("秋さん", "相談者さん");
   content = content.replace(/・ＨＮ\s*・年齢\s*・リクエストテーマ/g, "・リクエストテーマ");
   return textToHtml(content);
 }
