@@ -23,6 +23,9 @@ const mboxPath = findMbox(sourceDir);
 if (!mboxPath) throw new Error(`MBOX file was not found under ${sourceDir}`);
 const matchedHomepageLinkLabels = [];
 const homepageLinkTitleKeys = new Set(["些細なことで人生が変わる"]);
+const articleEndOverrides = new Map([
+  ["日本中に悩める女性がいるけど", /ワクワクドキドキの幸せは、あなたにも必ずつかめますからね！！/]
+]);
 
 const decoders = new Map();
 function decoderFor(charset) {
@@ -155,7 +158,7 @@ function textToHtml(text) {
 function findArticleEnd(lines, start) {
   let footerIndex = lines.length;
   for (let index = start; index < lines.length; index += 1) {
-    if (/^\s*(?:⇒|★☆|━━━━━━━━|================|＜やせずに幸せモテ女＞|<やせずに幸せモテ女>)/.test(lines[index])) {
+    if (/^\s*(?:⇒|★☆|━━━━━━━━|================|＜やせずに幸せモテ女＞\s*$|<やせずに幸せモテ女>\s*$)/.test(lines[index])) {
       footerIndex = index;
       break;
     }
@@ -173,6 +176,13 @@ function extractArticleBody(body, currentContent, currentTitle) {
   if (headingIndex < 0) return null;
   let start = headingIndex + 1;
   while (start < lines.length && (/^\s*$/.test(lines[start]) || /^[━=\-]{5,}\s*$/.test(lines[start]))) start += 1;
+
+  const overrideEnd = articleEndOverrides.get(currentTitle);
+  if (overrideEnd) {
+    const bodyEnd = lines.findIndex((line, index) => index >= start && overrideEnd.test(line));
+    if (bodyEnd >= 0) return textToHtml(lines.slice(start, bodyEnd + 1).join("\n").trim());
+  }
+
   const endInfo = findArticleEnd(lines, start);
   const defaultHtml = textToHtml(lines.slice(start, endInfo.end).join("\n").trim());
   if (endInfo.label === null) return defaultHtml;
