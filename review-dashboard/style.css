@@ -25,12 +25,10 @@ button { cursor: pointer; }
 .sync-status.checking { color: #9a6b00; }
 .sync-status.success { color: var(--accent-dark); }
 .sync-status.warning { color: var(--danger); }
-.view-tabs { display: flex; gap: 8px; margin-top: 16px; }
-.view-tabs a { padding: 7px 11px; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; color: #dcebea; font-size: .84rem; text-decoration: none; }
-.view-tabs a:hover, .view-tabs a.active { color: #203c3b; background: #d9f1eb; }
 .status-summary { display: flex; flex-wrap: wrap; gap: 8px; justify-content: end; }
-.status-summary > span, .summary-group { border: 1px solid rgba(255,255,255,.35); border-radius: 999px; }
-.status-summary > span { padding: 10px 14px; white-space: nowrap; font-size: .9rem; font-weight: 700; }
+.status-summary > a, .summary-group { border: 1px solid rgba(255,255,255,.35); border-radius: 999px; }
+.status-link { display: inline-block; padding: 10px 14px; color: #dcebea; background: transparent; white-space: nowrap; font-size: .9rem; font-weight: 700; text-decoration: none; }
+.status-link:hover, .status-link.active { color: #203c3b; background: #d9f1eb; }
 .status-summary strong { margin-right: 2px; font-size: 1.3rem; }
 .summary-group { display: grid; gap: 2px; padding: 7px 14px; background: rgba(255,255,255,.08); }
 .summary-group-title { white-space: nowrap; font-size: .9rem; font-weight: 700; }
