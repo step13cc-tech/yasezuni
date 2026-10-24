@@ -9,6 +9,7 @@ const manifestPath = path.join(repoRoot, "scripts", "preview-batch-images.json")
 const count = Number(process.argv.find((arg) => arg.startsWith("--count="))?.split("=")[1] || 30);
 const dryRun = process.argv.includes("--dry-run");
 const refresh = process.argv.includes("--refresh-existing");
+const homepageLinkTitleKeys = new Set(["些細なことで人生が変わる"]);
 
 function findMbox(directory) {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -129,8 +130,11 @@ function splitTextBlocks(text) {
 function textToHtml(text) {
   const html = [];
   for (const block of splitTextBlocks(text)) {
-    const lines = block.lines.map((line) => normalizeText(line)).filter(Boolean);
-    const isQuote = lines.some((line) => /^>/.test(line));
+    const isQuote = block.lines.some((line) => /^\s*>/.test(line));
+    const lines = block.lines
+      .map((line) => isQuote ? line.replace(/^\s*(?:>\s?)+/, "") : line)
+      .map((line) => normalizeText(line));
+    if (!isQuote) lines.splice(0, lines.length, ...lines.filter(Boolean));
     const normalized = isQuote ? lines.join("<br>") : normalizeText(lines.join(" "));
     if (normalized) {
       const escaped = escapeHtml(normalized).replaceAll("&lt;br&gt;", "<br>").replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" rel="noreferrer noopener" target="_blank">$1</a>');
@@ -159,6 +163,9 @@ function extractArticleBody(body, title) {
   for (let index = start; index < lines.length; index += 1) {
     if (/^\s*(?:⇒|★☆|━━━━━━━━|================|＜やせずに幸せモテ女＞|<やせずに幸せモテ女>)/.test(lines[index])) { end = index; break; }
   }
+  let labelIndex = end - 1;
+  while (labelIndex >= start && /^\s*$/.test(lines[labelIndex])) labelIndex -= 1;
+  if (labelIndex >= start && homepageLinkTitleKeys.has(compact(lines[labelIndex]))) end = labelIndex;
   let content = lines.slice(start, end)
     .filter((line) => !/^\s*(?:配信停止|購読解除|登録解除|配信先変更)\b/.test(line))
     .join("\n")

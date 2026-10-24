@@ -6,6 +6,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const sourceDir = path.resolve(repoRoot, "..", "mail-magazine-source", "extracted");
 const dataPath = path.join(repoRoot, "src", "_data", "posts.json");
 const count = Number(process.argv[2] || 10);
+const homepageLinkTitleKeys = new Set(["些細なことで人生が変わる"]);
 
 function findMbox(directory) {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -96,9 +97,14 @@ function splitTextBlocks(text) {
 function textToHtml(text) {
   const html = [];
   for (const block of splitTextBlocks(text)) {
-    const normalized = normalizeText(block.lines.join(" "));
+    const isQuote = block.lines.some((line) => /^\s*>/.test(line));
+    const lines = block.lines
+      .map((line) => isQuote ? line.replace(/^\s*(?:>\s?)+/, "") : line)
+      .map((line) => normalizeText(line));
+    if (!isQuote) lines.splice(0, lines.length, ...lines.filter(Boolean));
+    const normalized = isQuote ? lines.join("<br>") : normalizeText(lines.join(" "));
     if (!normalized) continue;
-    const escaped = escapeHtml(normalized).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" rel="noreferrer noopener" target="_blank">$1</a>');
+    const escaped = escapeHtml(normalized).replaceAll("&lt;br&gt;", "<br>").replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" rel="noreferrer noopener" target="_blank">$1</a>');
     html.push(`<p>　${escaped}</p>`);
     const spacerCount = Math.max(0, Math.ceil((block.blankLines + 1) / 2) - 1);
     for (let spacer = 0; spacer < spacerCount; spacer += 1) {
@@ -121,6 +127,9 @@ function extractArticleBody(body) {
   for (let index = start; index < lines.length; index += 1) {
     if (/^\s*(?:⇒|★☆|━━━━━━━━|================|＜やせずに幸せモテ女＞|<やせずに幸せモテ女>)/.test(lines[index])) { end = index; break; }
   }
+  let labelIndex = end - 1;
+  while (labelIndex >= start && /^\s*$/.test(lines[labelIndex])) labelIndex -= 1;
+  if (labelIndex >= start && homepageLinkTitleKeys.has(compact(lines[labelIndex]))) end = labelIndex;
   const content = lines.slice(start, end).join("\n").trim();
   return textToHtml(content);
 }

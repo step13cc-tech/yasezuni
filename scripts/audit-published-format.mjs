@@ -21,6 +21,8 @@ function findMbox(directory) {
 
 const mboxPath = findMbox(sourceDir);
 if (!mboxPath) throw new Error(`MBOX file was not found under ${sourceDir}`);
+const matchedHomepageLinkLabels = [];
+const homepageLinkTitleKeys = new Set(["些細なことで人生が変わる"]);
 
 const decoders = new Map();
 function decoderFor(charset) {
@@ -133,9 +135,15 @@ function splitTextBlocks(text) {
 function textToHtml(text) {
   const html = [];
   for (const block of splitTextBlocks(text)) {
-    const normalized = normalizeText(block.lines.join(" "));
+    const hasQuoteMarkers = block.lines.some((line) => /^\s*>/.test(line));
+    const normalizedLines = block.lines
+      .map((line) => hasQuoteMarkers ? line.replace(/^\s*(?:>\s?)+/, "") : line)
+      .map((line) => normalizeText(line));
+    if (!hasQuoteMarkers) normalizedLines.splice(0, normalizedLines.length, ...normalizedLines.filter(Boolean));
+    const normalized = normalizedLines.join(hasQuoteMarkers ? "<br>" : " ");
     if (!normalized) continue;
-    html.push(`<p>　${escapeHtml(normalized)}</p>`);
+    const escaped = escapeHtml(normalized).replaceAll("&lt;br&gt;", "<br>");
+    html.push(`<p>　${escaped}</p>`);
     const spacerCount = Math.max(0, Math.ceil((block.blankLines + 1) / 2) - 1);
     for (let index = 0; index < spacerCount; index += 1) {
       html.push('<p class="article-spacer" aria-hidden="true">&nbsp;</p>');
@@ -144,17 +152,47 @@ function textToHtml(text) {
   return html.join("\n\n");
 }
 
-function extractArticleBody(body) {
+function findArticleEnd(lines, start) {
+  let footerIndex = lines.length;
+  for (let index = start; index < lines.length; index += 1) {
+    if (/^\s*(?:⇒|★☆|━━━━━━━━|================|＜やせずに幸せモテ女＞|<やせずに幸せモテ女>)/.test(lines[index])) {
+      footerIndex = index;
+      break;
+    }
+  }
+  if (footerIndex === lines.length) return { end: footerIndex, label: null };
+
+  let labelIndex = footerIndex - 1;
+  while (labelIndex >= start && /^\s*$/.test(lines[labelIndex])) labelIndex -= 1;
+  return { end: footerIndex, label: labelIndex >= start ? labelIndex : null };
+}
+
+function extractArticleBody(body, currentContent, currentTitle) {
   const lines = body.replace(/\r/g, "").split("\n");
   const headingIndex = lines.findIndex((line) => /^\s*■.*■\s*$/.test(line));
   if (headingIndex < 0) return null;
   let start = headingIndex + 1;
   while (start < lines.length && (/^\s*$/.test(lines[start]) || /^[━=\-]{5,}\s*$/.test(lines[start]))) start += 1;
-  let end = lines.length;
-  for (let index = start; index < lines.length; index += 1) {
-    if (/^\s*(?:⇒|★☆|━━━━━━━━|================|＜やせずに幸せモテ女＞|<やせずに幸せモテ女>)/.test(lines[index])) { end = index; break; }
+  const endInfo = findArticleEnd(lines, start);
+  const defaultHtml = textToHtml(lines.slice(start, endInfo.end).join("\n").trim());
+  if (endInfo.label === null) return defaultHtml;
+
+  const labelKey = compact(lines[endInfo.label]);
+  const candidateHtml = textToHtml(lines.slice(start, endInfo.label).join("\n").trim());
+  const isPlausibleHomepageLinkTitle = !/[：:＠@]/.test(labelKey) && !/^https?:/i.test(labelKey);
+  if (isPlausibleHomepageLinkTitle && homepageLinkTitleKeys.has(labelKey)) {
+    matchedHomepageLinkLabels.push({ title: currentTitle || "", label: normalizeText(lines[endInfo.label]), reason: "known-homepage-link-title" });
+    return candidateHtml;
   }
-  return textToHtml(lines.slice(start, end).join("\n").trim());
+  if (isPlausibleHomepageLinkTitle && currentContent) {
+    const currentKeys = contentKeys(parseParagraphs(currentContent));
+    const candidateKeys = contentKeys(parseParagraphs(candidateHtml));
+    if (JSON.stringify(currentKeys) === JSON.stringify(candidateKeys)) {
+      matchedHomepageLinkLabels.push({ title: currentTitle || "", label: normalizeText(lines[endInfo.label]), reason: "matched-current-article" });
+      return candidateHtml;
+    }
+  }
+  return defaultHtml;
 }
 
 function decodeHtml(value) {
@@ -187,6 +225,43 @@ function flattenedParagraphText(paragraphs) {
 
 function structuralSignature(paragraphs) {
   return paragraphs.map((paragraph) => paragraph.spacer ? "S" : "P").join("");
+}
+
+function normalizeExistingQuoteMarkers(content) {
+  return content.replace(/<p([^>]*)>([\s\S]*?)<\/p>/g, (raw, attributes, inner) => {
+    if (!/(?:^|<br\s*\/?>)\s*(?:&gt;|>)/i.test(inner)) return raw;
+    const parts = inner.split(/<br\s*\/?>/i);
+    let changed = false;
+    const normalized = parts.map((part) => {
+      if (/^<br/i.test(part)) return part;
+      const next = part.replace(/^\s*(?:(?:&gt;|>)\s?)+/, "");
+      if (next !== part) changed = true;
+      return next;
+    }).join("<br>");
+    return changed ? `<p${attributes}>${normalized}</p>` : raw;
+  });
+}
+
+function contentKeys(paragraphs) {
+  return paragraphs.filter((paragraph) => !paragraph.spacer).map((paragraph) => compact(paragraph.text));
+}
+
+function trimKnownHomepageLinkLabel(content, expectedParagraphs, linkTitleKeys) {
+  const currentParagraphs = parseParagraphs(content);
+  const currentKeys = contentKeys(currentParagraphs);
+  const expectedKeys = contentKeys(expectedParagraphs);
+  if (currentKeys.length !== expectedKeys.length + 1) return { content, changed: false };
+  if (currentKeys[currentKeys.length - 1] === "" || !linkTitleKeys.has(currentKeys[currentKeys.length - 1])) {
+    return { content, changed: false };
+  }
+  if (expectedKeys.some((key, index) => key !== currentKeys[index])) return { content, changed: false };
+  const lastContentIndex = currentParagraphs.map((paragraph, index) => ({ paragraph, index }))
+    .filter(({ paragraph }) => !paragraph.spacer).at(-1)?.index;
+  if (lastContentIndex === undefined) return { content, changed: false };
+  return {
+    content: currentParagraphs.slice(0, lastContentIndex).map((paragraph) => paragraph.raw).join("\n\n"),
+    changed: true
+  };
 }
 
 function safeSpacerInsertions(currentParagraphs, expectedParagraphs) {
@@ -237,6 +312,7 @@ const messages = raw.split(/\n(?=From )/)
   .map(parseMessage)
   .filter((message) => message?.dateMs !== null)
   .filter((message) => !/公開相談/.test(compact(message.subject)));
+const ruleChanges = [];
 
 function findMessage(post) {
   const titleKey = compact(post.title);
@@ -256,13 +332,20 @@ for (const post of published) {
     rows.push({ title: post.title, issue: "unmatched" });
     continue;
   }
-  const expected = extractArticleBody(message.body);
+  const quoteNormalizedContent = normalizeExistingQuoteMarkers(post.content || "");
+  const expected = extractArticleBody(message.body, quoteNormalizedContent, post.title);
   if (!expected) {
     rows.push({ title: post.title, issue: "source-body-unparsed" });
     continue;
   }
-  const currentParagraphs = parseParagraphs(post.content || "");
   const expectedParagraphs = parseParagraphs(expected);
+  const trimmed = trimKnownHomepageLinkLabel(quoteNormalizedContent, expectedParagraphs, homepageLinkTitleKeys);
+  const currentContent = trimmed.content;
+  if (quoteNormalizedContent !== (post.content || "") || trimmed.changed) {
+    ruleChanges.push({ title: post.title, quoteMarkersRemoved: quoteNormalizedContent !== (post.content || ""), homepageLinkLabelRemoved: trimmed.changed });
+    if (shouldFix) post.content = currentContent;
+  }
+  const currentParagraphs = parseParagraphs(currentContent);
   const textSame = flattenedParagraphText(currentParagraphs) === flattenedParagraphText(expectedParagraphs);
   const signatureSame = structuralSignature(currentParagraphs) === structuralSignature(expectedParagraphs);
   const spacerPlan = safeSpacerInsertions(currentParagraphs, expectedParagraphs);
@@ -329,7 +412,7 @@ if (shouldFix) {
   for (const post of published) {
     if (!boundaryTitles.has(post.title)) continue;
     const message = findMessage(post);
-    const expected = message ? extractArticleBody(message.body) : null;
+    const expected = message ? extractArticleBody(message.body, post.content || "", post.title) : null;
     if (expected) {
       post.content = expected;
       const row = rows.find((item) => item.title === post.title && item.issue === "structure-different");
@@ -340,4 +423,4 @@ if (shouldFix) {
 }
 
 const counts = rows.reduce((result, row) => { result[row.issue] = (result[row.issue] || 0) + 1; return result; }, {});
-console.log(JSON.stringify({ published: published.length, messages: messages.length, issues: rows.length, fixed: rows.filter((row) => row.fixed).length, counts, rows }, null, 2));
+console.log(JSON.stringify({ published: published.length, messages: messages.length, issues: rows.length, fixed: rows.filter((row) => row.fixed).length, ruleChanges: ruleChanges.length, ruleChangesDetail: ruleChanges, homepageLinkLabelsRemovedFromSource: matchedHomepageLinkLabels.length, homepageLinkLabelsDetail: matchedHomepageLinkLabels, counts, rows }, null, 2));
