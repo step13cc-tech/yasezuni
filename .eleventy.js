@@ -17,6 +17,20 @@ module.exports = function (eleventyConfig) {
     return values;
   });
 
+  eleventyConfig.addFilter("wrapArticleQuotes", (html, slug) => {
+    if (slug !== "あっという間に彼" || typeof html !== "string") return html;
+
+    const quotePatterns = [
+      /<p>ユズさん。お久しぶりです。[\s\S]*?ありがとうございました。<\/p>/,
+      /<p>なんだ、そのままの自分でいいじゃん！が上辺だけでなく、[\s\S]*?あっという間に彼ができました。<\/p>/
+    ];
+
+    return quotePatterns.reduce(
+      (result, pattern) => result.replace(pattern, (quote) => `<blockquote class="article-quote"><p class="article-quote-label">引用文</p>${quote}</blockquote>`),
+      html
+    );
+  });
+
   return {
     dir: {
       input: "src",
