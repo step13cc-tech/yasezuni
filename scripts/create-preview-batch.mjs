@@ -114,14 +114,24 @@ function escapeHtml(value) {
 }
 
 function textToHtml(text) {
-  return text.split(/\n{2,}/).map((block) => {
+  const parts = text.split(/(\n{2,})/);
+  const html = [];
+  for (let index = 0; index < parts.length; index += 2) {
+    const block = parts[index];
     const lines = block.split("\n").map((line) => normalizeText(line)).filter(Boolean);
     const isQuote = lines.some((line) => /^>/.test(line));
     const normalized = isQuote ? lines.join("<br>") : normalizeText(block.replace(/\n/g, " "));
-    if (!normalized) return "";
-    const escaped = escapeHtml(normalized).replaceAll("&lt;br&gt;", "<br>").replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" rel="noreferrer noopener" target="_blank">$1</a>');
-    return `<p>　${escaped}</p>`;
-  }).filter(Boolean).join("\n\n");
+    if (normalized) {
+      const escaped = escapeHtml(normalized).replaceAll("&lt;br&gt;", "<br>").replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" rel="noreferrer noopener" target="_blank">$1</a>');
+      html.push(`<p>　${escaped}</p>`);
+    }
+    const separator = parts[index + 1] || "";
+    const spacerCount = Math.max(0, Math.ceil(separator.length / 2) - 1);
+    for (let spacer = 0; spacer < spacerCount; spacer += 1) {
+      html.push('<p class="article-spacer" aria-hidden="true">&nbsp;</p>');
+    }
+  }
+  return html.join("\n\n");
 }
 
 function extractHeading(body) {
@@ -142,23 +152,28 @@ function extractArticleBody(body, title) {
   let content = lines.slice(start, end)
     .filter((line) => !/^\s*(?:配信停止|購読解除|登録解除|配信先変更)\b/.test(line))
     .join("\n")
-    .replace(/\n{3,}/g, "\n\n")
     .trim();
   const titleText = normalizeText(title);
-  const blocks = content.split(/\n{2,}/).filter((block) => {
+  const parts = content.split(/(\n{2,})/);
+  const kept = [];
+  let separator = "\n\n";
+  for (let index = 0; index < parts.length; index += 2) {
+    const block = parts[index];
     const normalized = normalizeText(block.replace(/\n/g, " "));
-    if (normalized === titleText || /^ＨＮ.*「幸せ」$/.test(normalized)) return false;
-    if (/@/.test(normalized)) return false;
-    if (/^秋さん、(?:メールありがとうございました|末永くお幸せに)/.test(normalized)) return false;
-    return true;
-  });
-  content = blocks.join("\n\n").replaceAll("秋さん", "相談者さん");
+    if (normalized === titleText || /^ＨＮ.*「幸せ」$/.test(normalized)) continue;
+    if (/@/.test(normalized)) continue;
+    if (/^秋さん、(?:メールありがとうございました|末永くお幸せに)/.test(normalized)) continue;
+    if (kept.length) kept.push(separator);
+    kept.push(block);
+    separator = parts[index + 1] || "\n\n";
+  }
+  content = kept.join("").replaceAll("秋さん", "相談者さん");
   content = content.replace(/・ＨＮ\s*・年齢\s*・リクエストテーマ/g, "・リクエストテーマ");
   return textToHtml(content);
 }
 
 function makeExcerpt(content) {
-  const text = content.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+  const text = content.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
   return text.length > 140 ? `${text.slice(0, 140)}…` : text;
 }
 

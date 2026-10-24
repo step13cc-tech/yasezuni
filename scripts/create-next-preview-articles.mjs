@@ -81,12 +81,22 @@ function escapeHtml(value) {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
 function textToHtml(text) {
-  return text.split(/\n{2,}/).map((block) => {
+  const parts = text.split(/(\n{2,})/);
+  const html = [];
+  for (let index = 0; index < parts.length; index += 2) {
+    const block = parts[index];
     const normalized = normalizeText(block.replace(/\n/g, " "));
-    if (!normalized) return "";
-    const escaped = escapeHtml(normalized).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" rel="noreferrer noopener" target="_blank">$1</a>');
-    return `<p>　${escaped}</p>`;
-  }).filter(Boolean).join("\n\n");
+    if (normalized) {
+      const escaped = escapeHtml(normalized).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" rel="noreferrer noopener" target="_blank">$1</a>');
+      html.push(`<p>　${escaped}</p>`);
+    }
+    const separator = parts[index + 1] || "";
+    const spacerCount = Math.max(0, Math.ceil(separator.length / 2) - 1);
+    for (let spacer = 0; spacer < spacerCount; spacer += 1) {
+      html.push('<p class="article-spacer" aria-hidden="true">&nbsp;</p>');
+    }
+  }
+  return html.join("\n\n");
 }
 function extractHeading(body) {
   const line = body.replace(/\r/g, "").split("\n").find((value) => /^\s*■.*■\s*$/.test(value));
@@ -102,11 +112,11 @@ function extractArticleBody(body) {
   for (let index = start; index < lines.length; index += 1) {
     if (/^\s*(?:⇒|★☆|━━━━━━━━|================)/.test(lines[index])) { end = index; break; }
   }
-  const content = lines.slice(start, end).join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  const content = lines.slice(start, end).join("\n").trim();
   return textToHtml(content);
 }
 function makeExcerpt(content) {
-  const text = content.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+  const text = content.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
   return text.length > 140 ? `${text.slice(0, 140)}…` : text;
 }
 

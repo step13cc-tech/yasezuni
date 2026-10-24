@@ -71,6 +71,7 @@ h2 { margin: 0; font-size: 1.1rem; }
 .preview-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 1fr); gap: 22px; margin-top: 22px; }
 .content-editor, .article-preview { min-height: 440px; padding: 17px; border: 1px solid var(--line); border-radius: 8px; background: white; }
 .content-editor { outline: none; line-height: 1.9; white-space: normal; }
+.content-editor p.article-spacer, .preview-content p.article-spacer { min-height: 1.9em; margin: 0 0 1.2em; }
 .content-editor:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(19,138,120,.12); }
 .article-preview { overflow: auto; }
 .article-preview h2 { margin: 0 0 18px; font-size: 1.35rem; line-height: 1.5; }

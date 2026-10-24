@@ -34,6 +34,7 @@ main.wrap { display:block; margin-top:34px; padding:30px 34px 48px; background:r
 .article-nav-empty { visibility:hidden; }
 .entry-content { font-size:1rem; }
 .entry-content p { margin:0 0 1.1em; }
+.entry-content p.article-spacer { min-height:1.1em; margin:0 0 1.1em; }
 .entry-content img { max-width:100%; height:auto; border-radius:2px; }
 .entry-content figure { margin:1.5rem 0; }
 .entry-content blockquote { margin:1.5rem 0; padding:1rem 1.25rem; border-left:4px solid var(--aqua); background:#f3fbfb; }
