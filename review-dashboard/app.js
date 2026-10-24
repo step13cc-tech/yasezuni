@@ -5,6 +5,8 @@ const rejectedCount = document.querySelector("#rejected-count");
 const publishedCount = document.querySelector("#published-count");
 const publishedReflectedCount = document.querySelector("#published-reflected-count");
 const publishedUnreflectedCount = document.querySelector("#published-unreflected-count");
+const syncButton = document.querySelector("#sync-button");
+const syncStatus = document.querySelector("#sync-status");
 const requestedStatus = new URLSearchParams(window.location.search).get("status");
 const viewStatus = ["preview-wait", "public-wait", "rejected"].includes(requestedStatus) ? requestedStatus : "preview-wait";
 const readOnly = viewStatus !== "preview-wait";
@@ -44,6 +46,47 @@ function showMessage(text, type = "") {
 function showSaveStatus(text, type = "") {
   saveStatus.textContent = text;
   saveStatus.className = `save-status ${type}`;
+}
+
+function shortRevision(revision) {
+  return revision ? revision.slice(0, 7) : "不明";
+}
+
+function renderCounts(data) {
+  count.textContent = data.previewWait;
+  publicWaitCount.textContent = data.publicWait;
+  rejectedCount.textContent = data.rejected;
+  publishedCount.textContent = data.published;
+  publishedReflectedCount.textContent = data.repositoryComparisonAvailable ? data.publishedReflected : "確認不可";
+  publishedUnreflectedCount.textContent = data.repositoryComparisonAvailable ? data.publishedUnreflected : "確認不可";
+}
+
+function renderSyncStatus(data) {
+  if (data.fetchSucceeded === false) {
+    const cacheIsAligned = data.localAheadBy === 0 && data.remoteAheadBy === 0 && data.statusDifferenceCount === 0;
+    syncStatus.textContent = cacheIsAligned
+      ? `自動取得はできませんでしたが、現在のGitHub Desktop取得済み状態とは一致しています（${shortRevision(data.remoteRevision)}）。`
+      : data.fetchError || "GitHub DesktopでFetchまたはPullを実行してください。";
+    syncStatus.className = "sync-status warning";
+    return;
+  }
+  if (!data.repositoryComparisonAvailable) {
+    syncStatus.textContent = "GitHub側の状態を比較できません。";
+    syncStatus.className = "sync-status warning";
+    return;
+  }
+  const remoteAhead = Number(data.remoteAheadBy) > 0;
+  const statusDiffers = Number(data.statusDifferenceCount) > 0;
+  if (remoteAhead || statusDiffers) {
+    const details = [];
+    if (remoteAhead) details.push(`GitHub側が${data.remoteAheadBy}コミット先行`);
+    if (statusDiffers) details.push(`状態の違い${data.statusDifferenceCount}件`);
+    syncStatus.textContent = `${details.join("・")}。GitHub DesktopでPullしてください。`;
+    syncStatus.className = "sync-status warning";
+    return;
+  }
+  syncStatus.textContent = `同期済み（${shortRevision(data.remoteRevision)}）`;
+  syncStatus.className = "sync-status success";
 }
 
 function configureView() {
@@ -100,12 +143,8 @@ async function loadCounts() {
   const response = await fetch("/api/counts");
   if (response.ok) {
     const data = await response.json();
-    count.textContent = data.previewWait;
-    publicWaitCount.textContent = data.publicWait;
-    rejectedCount.textContent = data.rejected;
-    publishedCount.textContent = data.published;
-    publishedReflectedCount.textContent = data.repositoryComparisonAvailable ? data.publishedReflected : "確認不可";
-    publishedUnreflectedCount.textContent = data.repositoryComparisonAvailable ? data.publishedUnreflected : "確認不可";
+    renderCounts(data);
+    renderSyncStatus(data);
     return;
   }
 
@@ -129,6 +168,27 @@ async function loadCounts() {
   publishedCount.textContent = publishedData.posts.length;
   publishedReflectedCount.textContent = "確認不可";
   publishedUnreflectedCount.textContent = "確認不可";
+}
+
+async function syncRemoteStatus(showError = true) {
+  syncButton.disabled = true;
+  syncButton.textContent = "確認中…";
+  syncStatus.textContent = "GitHubの最新状態を確認しています…";
+  syncStatus.className = "sync-status checking";
+  try {
+    const response = await fetch("/api/sync", { method: "POST" });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "GitHubの状態を確認できませんでした。");
+    renderCounts(data);
+    renderSyncStatus(data);
+  } catch (error) {
+    syncStatus.textContent = error.message || "GitHubの状態を確認できませんでした。";
+    syncStatus.className = "sync-status warning";
+    if (showError) showMessage(syncStatus.textContent, "error");
+  } finally {
+    syncButton.disabled = false;
+    syncButton.textContent = "GitHubの最新状態を確認";
+  }
 }
 
 async function loadPosts(keepSelection = true) {
@@ -292,6 +352,12 @@ rejectButton.addEventListener("click", rejectPost);
 approveButton.addEventListener("click", approvePost);
 moveToPreviewButton.addEventListener("click", movePostToPreview);
 publishNowButton.addEventListener("click", publishPostNow);
-document.querySelector("#refresh-button").addEventListener("click", () => loadPosts(true));
+document.querySelector("#refresh-button").addEventListener("click", async () => {
+  await syncRemoteStatus(true);
+  await loadPosts(true);
+});
+syncButton.addEventListener("click", () => syncRemoteStatus(true));
 configureView();
-loadPosts(false).catch((error) => showMessage(error.message, "error"));
+loadPosts(false)
+  .then(() => syncRemoteStatus(false))
+  .catch((error) => showMessage(error.message, "error"));

@@ -33,6 +33,39 @@ function readRemotePosts() {
   }
 }
 
+function fetchRemoteMain() {
+  execFileSync("git", ["fetch", "origin", "main"], {
+    cwd: repoRoot,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+}
+
+function gitRevision(ref) {
+  try {
+    return execFileSync("git", ["rev-parse", ref], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"]
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+
+function revisionDistance() {
+  try {
+    const output = execFileSync("git", ["rev-list", "--left-right", "--count", "HEAD...origin/main"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"]
+    }).trim().split(/\s+/).map(Number);
+    return { localAheadBy: output[0] || 0, remoteAheadBy: output[1] || 0 };
+  } catch {
+    return { localAheadBy: null, remoteAheadBy: null };
+  }
+}
+
 function publicationCounts(posts) {
   const result = posts.reduce((counts, post) => {
     const status = statusOf(post);
@@ -43,14 +76,44 @@ function publicationCounts(posts) {
     return counts;
   }, { previewWait: 0, publicWait: 0, rejected: 0, published: 0 });
   const remotePosts = readRemotePosts();
-  if (!remotePosts) return { ...result, repositoryComparisonAvailable: false };
+  const localRevision = gitRevision("HEAD");
+  const remoteRevision = gitRevision("origin/main");
+  const distance = revisionDistance();
+  if (!remotePosts) return {
+    ...result,
+    repositoryComparisonAvailable: false,
+    localRevision,
+    remoteRevision,
+    ...distance
+  };
+  const remoteBySlug = new Map(remotePosts.map((post) => [post.slug, post]));
   const remotePublished = new Set(remotePosts.filter((post) => statusOf(post) === "published").map((post) => post.slug));
   const localPublished = posts.filter((post) => statusOf(post) === "published");
+  const statusDifferenceCount = posts.filter((post) => {
+    const remotePost = remoteBySlug.get(post.slug);
+    return remotePost && (post.published !== remotePost.published || statusOf(post) !== statusOf(remotePost));
+  }).length;
+  const remoteCounts = remotePosts.reduce((counts, post) => {
+    const status = statusOf(post);
+    if (status === "preview-wait") counts.previewWait += 1;
+    if (status === "public-wait") counts.publicWait += 1;
+    if (status === "rejected") counts.rejected += 1;
+    if (status === "published") counts.published += 1;
+    return counts;
+  }, { previewWait: 0, publicWait: 0, rejected: 0, published: 0 });
   return {
     ...result,
-    publishedReflected: remotePublished.size,
+    publishedReflected: localPublished.filter((post) => remotePublished.has(post.slug)).length,
     publishedUnreflected: localPublished.filter((post) => !remotePublished.has(post.slug)).length,
-    repositoryComparisonAvailable: true
+    repositoryComparisonAvailable: true,
+    localRevision,
+    remoteRevision,
+    ...distance,
+    statusDifferenceCount,
+    remotePreviewWait: remoteCounts.previewWait,
+    remotePublicWait: remoteCounts.publicWait,
+    remoteRejected: remoteCounts.rejected,
+    remotePublished: remoteCounts.published
   };
 }
 
@@ -165,6 +228,20 @@ const server = http.createServer(async (request, response) => {
   try {
     if (url.pathname === "/api/counts" && request.method === "GET") {
       sendJson(response, 200, publicationCounts(readPosts()));
+      return;
+    }
+
+    if (url.pathname === "/api/sync" && request.method === "POST") {
+      try {
+        fetchRemoteMain();
+        sendJson(response, 200, { ...publicationCounts(readPosts()), fetchSucceeded: true });
+      } catch (error) {
+        sendJson(response, 200, {
+          ...publicationCounts(readPosts()),
+          fetchSucceeded: false,
+          fetchError: "GitHubの最新情報を自動取得できませんでした。GitHub DesktopでFetchまたはPullを実行してください。"
+        });
+      }
       return;
     }
 

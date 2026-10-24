@@ -17,6 +17,14 @@ button { cursor: pointer; }
 .dashboard-header h1 { margin: 4px 0 0; font-size: clamp(1.45rem, 3vw, 2.1rem); }
 .eyebrow { margin: 0; color: #a9ddd2; font-size: .85rem; }
 .publication-note { max-width: 1600px; margin: 0 auto; padding: 10px 34px; color: var(--muted); background: #f8fbfb; font-size: .78rem; line-height: 1.6; }
+.publication-note p { margin: 0; }
+.sync-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 6px; }
+.sync-row button { padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: white; font-weight: 700; }
+.sync-row button:disabled { cursor: wait; opacity: .65; }
+.sync-status { font-weight: 700; }
+.sync-status.checking { color: #9a6b00; }
+.sync-status.success { color: var(--accent-dark); }
+.sync-status.warning { color: var(--danger); }
 .view-tabs { display: flex; gap: 8px; margin-top: 16px; }
 .view-tabs a { padding: 7px 11px; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; color: #dcebea; font-size: .84rem; text-decoration: none; }
 .view-tabs a:hover, .view-tabs a.active { color: #203c3b; background: #d9f1eb; }
