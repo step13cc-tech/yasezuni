@@ -80,6 +80,9 @@ h2 { margin: 0; font-size: 1.1rem; }
 .correction-candidates li { margin: 8px 0; color: var(--ink); line-height: 1.6; }
 .candidate-position { color: #795b00; font-size: .82rem; font-weight: 700; }
 .correction-candidates li p { margin: 2px 0 0; color: var(--muted); font-size: .84rem; }
+.candidate-apply { margin-top: 6px; padding: 5px 9px; border: 1px solid #c8a83f; border-radius: 5px; color: #634d00; background: #fff; font-size: .78rem; font-weight: 700; }
+.candidate-apply:hover:not(:disabled) { background: #fff3c8; }
+.candidate-apply:disabled { cursor: default; opacity: .62; }
 .preview-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 1fr); gap: 22px; margin-top: 22px; }
 .content-editor, .article-preview { min-height: 440px; padding: 17px; border: 1px solid var(--line); border-radius: 8px; background: white; }
 .content-editor { outline: none; line-height: 1.9; white-space: normal; }

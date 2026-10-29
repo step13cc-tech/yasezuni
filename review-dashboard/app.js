@@ -140,6 +140,46 @@ function updatePreview() {
   previewContent.innerHTML = contentEditor.innerHTML;
 }
 
+function textNodeWalker() {
+  return document.createTreeWalker(contentEditor, NodeFilter.SHOW_TEXT);
+}
+
+function candidateOccurrenceCount(original) {
+  if (!original) return 0;
+  let count = 0;
+  const walker = textNodeWalker();
+  while (walker.nextNode()) {
+    const text = walker.currentNode.nodeValue || "";
+    count += text.split(original).length - 1;
+  }
+  return count;
+}
+
+function applyCorrectionCandidate(candidate, button) {
+  const original = String(candidate.original || "");
+  const suggestion = String(candidate.suggestion || "");
+  if (!original || !suggestion) return;
+  let count = 0;
+  const walker = textNodeWalker();
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    const text = node.nodeValue || "";
+    const occurrences = text.split(original).length - 1;
+    if (!occurrences) continue;
+    node.nodeValue = text.split(original).join(suggestion);
+    count += occurrences;
+  }
+  if (!count) {
+    button.disabled = true;
+    button.textContent = "本文に反映済み";
+    return;
+  }
+  button.disabled = true;
+  button.textContent = `反映済み（${count}か所）`;
+  markUnsaved();
+  showMessage(`修正候補を本文に反映しました（${count}か所）。保存する場合は「修正を保存」を押してください。`, "success");
+}
+
 function renderCorrectionCandidates(candidates) {
   correctionCandidateList.replaceChildren();
   if (!Array.isArray(candidates) || candidates.length === 0) {
@@ -159,7 +199,18 @@ function renderCorrectionCandidates(candidates) {
     position.textContent = `（${candidate.position || "本文内の位置を確認"}）`;
     const reason = document.createElement("p");
     reason.textContent = candidate.reason || "修正候補です。";
-    item.append(original, arrow, suggestion, position, reason);
+    const action = document.createElement("button");
+    action.type = "button";
+    action.className = "candidate-apply";
+    action.textContent = "この修正を反映";
+    action.disabled = readOnly;
+    if (readOnly) action.title = "レビュー待ちの記事でのみ反映できます。";
+    else if (!candidateOccurrenceCount(candidate.original)) {
+      action.disabled = true;
+      action.textContent = "本文に反映済み";
+    }
+    action.addEventListener("click", () => applyCorrectionCandidate(candidate, action));
+    item.append(original, arrow, suggestion, position, reason, action);
     correctionCandidateList.append(item);
   }
   correctionCandidates.hidden = false;
