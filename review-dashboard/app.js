@@ -12,6 +12,7 @@ const viewStatus = ["preview-wait", "public-wait", "rejected"].includes(requeste
 const readOnly = viewStatus !== "preview-wait";
 const listHeading = document.querySelector("#list-heading");
 const listHelp = document.querySelector("#list-help");
+const listMessage = document.querySelector("#list-message");
 const previewTab = document.querySelector("#preview-tab");
 const publicWaitTab = document.querySelector("#public-wait-tab");
 const rejectedTab = document.querySelector("#rejected-tab");
@@ -28,6 +29,7 @@ const saveButton = document.querySelector("#save-button");
 const saveStatus = document.querySelector("#save-status");
 const rejectButton = document.querySelector("#reject-button");
 const approveButton = document.querySelector("#approve-button");
+const approveAllButton = document.querySelector("#approve-all-button");
 const moveToPreviewButton = document.querySelector("#move-to-preview-button");
 const publishNowButton = document.querySelector("#publish-now-button");
 let currentSlug = "";
@@ -43,6 +45,11 @@ function showMessage(text, type = "") {
   message.className = `message ${type}`;
 }
 
+function showListMessage(text, type = "") {
+  listMessage.textContent = text;
+  listMessage.className = `message ${type}`;
+}
+
 function showSaveStatus(text, type = "") {
   saveStatus.textContent = text;
   saveStatus.className = `save-status ${type}`;
@@ -50,6 +57,19 @@ function showSaveStatus(text, type = "") {
 
 function shortRevision(revision) {
   return revision ? revision.slice(0, 7) : "不明";
+}
+
+async function readApiResponse(response) {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {
+      error: response.status === 404
+        ? "レビューサーバーが古い可能性があります。サーバーを再起動してから、画面を更新してください。"
+        : `サーバーから正しい応答を受け取れませんでした（HTTP ${response.status}）。`
+    };
+  }
 }
 
 function renderCounts(data) {
@@ -102,6 +122,7 @@ function configureView() {
   saveButton.hidden = readOnly;
   rejectButton.hidden = readOnly;
   approveButton.hidden = readOnly;
+  approveAllButton.hidden = viewStatus !== "preview-wait";
   moveToPreviewButton.hidden = viewStatus !== "public-wait" && viewStatus !== "rejected";
   publishNowButton.hidden = viewStatus !== "public-wait";
   saveStatus.hidden = readOnly;
@@ -273,6 +294,32 @@ async function approvePost() {
   await loadPosts(false);
 }
 
+async function approveAllPosts() {
+  if (viewStatus !== "preview-wait") return;
+  const previewCount = Number.parseInt(count.textContent, 10) || 0;
+  if (!previewCount) {
+    showListMessage("現在、公開待ちへ移動する記事はありません。", "success");
+    return;
+  }
+  if (!window.confirm(`プレビュー待ちの${previewCount}件を、すべて公開待ちに移動しますか？\n\n記事の本文や画像は変更せず、状態だけを変更します。`)) return;
+  approveAllButton.disabled = true;
+  approveAllButton.textContent = "移動中…";
+  try {
+    const response = await fetch("/api/posts/approve-all", { method: "POST" });
+    const result = await readApiResponse(response);
+    if (!response.ok) return showMessage(result.error || "公開待ちに移動できませんでした。", "error");
+    currentSlug = "";
+    currentPost = null;
+    await loadPosts(false);
+    showListMessage(`${result.movedCount}件を公開待ちに移動しました。GitHub Desktopでコミット・プッシュすると反映されます。`, "success");
+  } catch (error) {
+    showListMessage(error.message || "公開待ちに移動できませんでした。", "error");
+  } finally {
+    approveAllButton.disabled = false;
+    approveAllButton.textContent = "すべて公開待ちへ";
+  }
+}
+
 async function rejectPost() {
   if (!currentSlug || readOnly) return;
   if (!window.confirm("この記事を不採用にしますか？\n\n不採用にした記事は公開待ちへ移動せず、公開サイトにも掲載されません。")) return;
@@ -350,6 +397,7 @@ contentEditor.addEventListener("input", markUnsaved);
 saveButton.addEventListener("click", savePost);
 rejectButton.addEventListener("click", rejectPost);
 approveButton.addEventListener("click", approvePost);
+approveAllButton.addEventListener("click", approveAllPosts);
 moveToPreviewButton.addEventListener("click", movePostToPreview);
 publishNowButton.addEventListener("click", publishPostNow);
 document.querySelector("#refresh-button").addEventListener("click", async () => {

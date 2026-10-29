@@ -35,9 +35,13 @@
     <aside class="article-list-panel">
       <div class="panel-heading">
         <h2 id="list-heading">プレビュー待ち</h2>
-        <button id="refresh-button" type="button">更新</button>
+        <div class="panel-heading-actions">
+          <button id="approve-all-button" class="button primary" type="button">すべて公開待ちへ</button>
+          <button id="refresh-button" type="button">更新</button>
+        </div>
       </div>
       <p id="list-help" class="help-text">記事を選ぶと、右側で内容を確認・修正できます。</p>
+      <p id="list-message" class="message" role="status" aria-live="polite"></p>
       <div id="article-list" class="article-list"></div>
     </aside>
 

@@ -40,7 +40,10 @@ button { cursor: pointer; }
 .panel-heading, .editor-heading { display: flex; justify-content: space-between; gap: 16px; align-items: start; }
 h2 { margin: 0; font-size: 1.1rem; }
 .help-text { margin: 7px 0 18px; color: var(--muted); font-size: .84rem; line-height: 1.65; }
+.panel-heading-actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 8px; }
 .panel-heading button { padding: 5px 11px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: white; }
+.panel-heading .button.primary { padding: 7px 10px; border: 0; color: white; background: var(--accent); }
+.panel-heading .button.primary:hover { background: var(--accent-dark); }
 .article-list { display: grid; gap: 8px; }
 .article-list-item { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: center; width: 100%; padding: 9px; text-align: left; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: white; }
 .article-list-item:hover, .article-list-item.selected { border-color: var(--accent); background: #eefaf7; }

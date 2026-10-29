@@ -262,6 +262,20 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
+    if (url.pathname === "/api/posts/approve-all" && request.method === "POST") {
+      const posts = readPosts();
+      let movedCount = 0;
+      for (const post of posts) {
+        if (statusOf(post) !== "preview-wait") continue;
+        post.published = false;
+        post.reviewStatus = "public-wait";
+        movedCount += 1;
+      }
+      writePosts(posts);
+      sendJson(response, 200, { movedCount });
+      return;
+    }
+
     if (url.pathname.startsWith("/api/posts/") && request.method === "PUT") {
       const slug = postFromPath(url.pathname);
       const posts = readPosts();
