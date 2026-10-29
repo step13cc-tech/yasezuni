@@ -5,7 +5,17 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourceDir = path.resolve(repoRoot, "..", "mail-magazine-source", "extracted");
 const dataPath = path.join(repoRoot, "src", "_data", "posts.json");
-const manifestPath = path.join(repoRoot, "scripts", "preview-batch-images.json");
+const manifestArgument = process.argv.find((arg) => arg.startsWith("--manifest="));
+const imageDirArgument = process.argv.find((arg) => arg.startsWith("--image-dir="));
+const manifestPath = manifestArgument
+  ? path.resolve(repoRoot, manifestArgument.slice("--manifest=".length))
+  : path.join(repoRoot, "scripts", "preview-batch-images.json");
+const imageDir = imageDirArgument
+  ? path.resolve(repoRoot, imageDirArgument.slice("--image-dir=".length))
+  : path.join(repoRoot, "assets", "uploads", "2011", "02");
+const imageUrlDir = imageDirArgument
+  ? `/${path.relative(repoRoot, imageDir).replaceAll(path.sep, "/")}`
+  : "/assets/uploads/2011/02";
 const count = Number(process.argv.find((arg) => arg.startsWith("--count="))?.split("=")[1] || 30);
 const dryRun = process.argv.includes("--dry-run");
 const refresh = process.argv.includes("--refresh-existing");
@@ -230,7 +240,6 @@ if (dryRun) process.exit(0);
 
 const imageManifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 if (imageManifest.length < selected.length) throw new Error("画像マニフェストの枚数が不足しています。");
-const imageDir = path.join(repoRoot, "assets", "uploads", "2011", "02");
 for (const [index, candidate] of selected.entries()) {
   const image = imageManifest[index];
   const imagePath = path.join(imageDir, image.file);
@@ -240,8 +249,9 @@ for (const [index, candidate] of selected.entries()) {
     slug: candidate.title,
     title: candidate.title,
     excerpt: makeExcerpt(content),
-    image: `/assets/uploads/2011/02/${image.file}`,
+    image: `${imageUrlDir}/${image.file}`,
     content,
+    correctionCandidates: [],
     _sortTimestamp: candidate.dateMs,
     published: false,
     reviewStatus: "preview-wait"

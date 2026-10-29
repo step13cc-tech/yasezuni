@@ -24,6 +24,8 @@ const previewTitle = document.querySelector("#preview-title");
 const previewContent = document.querySelector("#preview-content");
 const previewImage = document.querySelector("#preview-image");
 const articleDate = document.querySelector("#article-date");
+const correctionCandidates = document.querySelector("#correction-candidates");
+const correctionCandidateList = document.querySelector("#correction-candidate-list");
 const message = document.querySelector("#message");
 const saveButton = document.querySelector("#save-button");
 const saveStatus = document.querySelector("#save-status");
@@ -138,6 +140,31 @@ function updatePreview() {
   previewContent.innerHTML = contentEditor.innerHTML;
 }
 
+function renderCorrectionCandidates(candidates) {
+  correctionCandidateList.replaceChildren();
+  if (!Array.isArray(candidates) || candidates.length === 0) {
+    correctionCandidates.hidden = true;
+    return;
+  }
+  for (const candidate of candidates) {
+    const item = document.createElement("li");
+    const original = document.createElement("strong");
+    original.textContent = `「${candidate.original || ""}」`;
+    const arrow = document.createElement("span");
+    arrow.textContent = " → ";
+    const suggestion = document.createElement("strong");
+    suggestion.textContent = `「${candidate.suggestion || ""}」`;
+    const position = document.createElement("span");
+    position.className = "candidate-position";
+    position.textContent = `（${candidate.position || "本文内の位置を確認"}）`;
+    const reason = document.createElement("p");
+    reason.textContent = candidate.reason || "修正候補です。";
+    item.append(original, arrow, suggestion, position, reason);
+    correctionCandidateList.append(item);
+  }
+  correctionCandidates.hidden = false;
+}
+
 function renderList(posts) {
   list.replaceChildren();
   if (!posts.length) {
@@ -241,6 +268,7 @@ async function selectPost(slug) {
     previewImage.src = post.image;
     previewImage.hidden = false;
   } else previewImage.hidden = true;
+  renderCorrectionCandidates(post.correctionCandidates);
   updatePreview();
   showSaveStatus("");
   emptyState.hidden = true;

@@ -6,8 +6,10 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dataPath = path.join(repoRoot, "src", "_data", "posts.json");
+const correctionCandidatesPath = path.join(repoRoot, "scripts", "correction-candidates-2011-03.json");
 const dashboardRoot = path.join(repoRoot, "review-dashboard");
 const port = Number(process.env.REVIEW_PORT || 3001);
+const correctionCandidatesByTitle = JSON.parse(fs.readFileSync(correctionCandidatesPath, "utf8"));
 
 const statusOf = (post) => post.reviewStatus ?? (post.published === true ? "published" : "public-wait");
 
@@ -163,6 +165,21 @@ function makeExcerpt(content) {
   return text.length > 140 ? `${text.slice(0, 140)}…` : text;
 }
 
+function addCorrectionCandidatePositions(content, candidates) {
+  if (!Array.isArray(candidates)) return [];
+  const paragraphs = [...String(content ?? "").matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)]
+    .filter((match) => !/article-spacer/.test(match[0]))
+    .map((match) => stripHtml(match[1]));
+  return candidates.map((candidate) => {
+    const original = String(candidate.original ?? "");
+    const paragraphIndex = paragraphs.findIndex((paragraph) => paragraph.includes(original));
+    return {
+      ...candidate,
+      position: paragraphIndex >= 0 ? `本文第${paragraphIndex + 1}段落目` : "本文内（位置を確認してください）"
+    };
+  });
+}
+
 function publicPost(post, includeContent = false) {
   return {
     slug: post.slug,
@@ -170,6 +187,12 @@ function publicPost(post, includeContent = false) {
     excerpt: post.excerpt,
     image: post.image,
     content: includeContent ? post.content : undefined,
+    correctionCandidates: includeContent
+      ? addCorrectionCandidatePositions(
+        post.content,
+        post.correctionCandidates?.length ? post.correctionCandidates : correctionCandidatesByTitle[post.title] || []
+      )
+      : undefined,
     sortTimestamp: post._sortTimestamp,
     reviewStatus: statusOf(post)
   };

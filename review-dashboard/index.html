@@ -70,6 +70,15 @@
         <label class="field-label" for="title-editor">タイトル</label>
         <input id="title-editor" class="title-editor" type="text">
 
+        <section id="correction-candidates" class="correction-candidates" hidden>
+          <div class="correction-candidates-heading">
+            <h2>文法・誤字脱字の修正候補</h2>
+            <span>本文にはまだ反映していません</span>
+          </div>
+          <p class="help-text">元原稿に忠実な本文を確認しながら、必要な候補だけ手動で修正してください。</p>
+          <ul id="correction-candidate-list"></ul>
+        </section>
+
         <div class="preview-layout">
           <div>
             <label class="field-label" for="content-editor">本文（クリックして編集）</label>
