@@ -76,7 +76,7 @@ function titleFromSubject(subject) {
 function normalizeText(value) {
   const japaneseTextChars = "ぁ-んァ-ヶ一-龯々ー！？。、，．：；）】〉》」』〕］｝（【〈《「『〔［｛";
   const lineWrapSpace = new RegExp(`(?<=[${japaneseTextChars}]) | (?=[${japaneseTextChars}])`, "g");
-  return value.replaceAll("メルマガ", "サイト").replaceAll("　", "").replace(lineWrapSpace, "").replace(/[ \t]+/g, " ").trim();
+  return value.replaceAll("メルマガ", "サイト").replace(/気持(?!ち)/g, "気持ち").replaceAll("　", "").replace(lineWrapSpace, "").replace(/[ \t]+/g, " ").trim();
 }
 function escapeHtml(value) {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
