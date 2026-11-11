@@ -141,6 +141,45 @@
 
 利用条件は[Unsplash License](https://unsplash.com/license)に従います。
 
+## 2011年4〜6月追加・レビュー待ち
+
+以下の30枚は、今回追加したレビュー待ち記事へ元メールの日付順に1枚ずつ割り当てています。既存記事とは重複しないPexelsの写真です。
+
+| ファイル | 記事 | 出典 |
+| --- | --- | --- |
+| `mag-next-31.jpg` | 自分を安心させる | [Pexels](https://www.pexels.com/photo/1181675/) |
+| `mag-next-32.jpg` | 「しまった…」のあと | [Pexels](https://www.pexels.com/photo/1181406/) |
+| `mag-next-33.jpg` | 頼まれごとをしたとき… | [Pexels](https://www.pexels.com/photo/1181244/) |
+| `mag-next-34.jpg` | 「また」に気づいたら＆ご協力のお願い | [Pexels](https://www.pexels.com/photo/1181686/) |
+| `mag-next-35.jpg` | 「ごめんなさい」や「すみません」 | [Pexels](https://www.pexels.com/photo/1516680/) |
+| `mag-next-36.jpg` | 報告～彼氏ができました～ | [Pexels](https://www.pexels.com/photo/1516681/) |
+| `mag-next-37.jpg` | 「みんなの意見が形になるといいな。」 | [Pexels](https://www.pexels.com/photo/1516683/) |
+| `mag-next-38.jpg` | 求めすぎ？サボりぎみ？ | [Pexels](https://www.pexels.com/photo/154147/) |
+| `mag-next-39.jpg` | 忙しい人とのデートは | [Pexels](https://www.pexels.com/photo/1647962/) |
+| `mag-next-40.jpg` | 離れた人とやり直します？ | [Pexels](https://www.pexels.com/photo/167964/) |
+| `mag-next-41.jpg` | どの角度かで変わる | [Pexels](https://www.pexels.com/photo/206064/) |
+| `mag-next-42.jpg` | 偶然だけじゃない | [Pexels](https://www.pexels.com/photo/207962/) |
+| `mag-next-43.jpg` | 関わるって？ | [Pexels](https://www.pexels.com/photo/2100063/) |
+| `mag-next-44.jpg` | 望む未来に近づく計画 | [Pexels](https://www.pexels.com/photo/3184418/) |
+| `mag-next-45.jpg` | 力を抜いて愛される | [Pexels](https://www.pexels.com/photo/3184287/) |
+| `mag-next-46.jpg` | 幸せだから結婚します | [Pexels](https://www.pexels.com/photo/3184465/) |
+| `mag-next-47.jpg` | 無理しない | [Pexels](https://www.pexels.com/photo/3760854/) |
+| `mag-next-48.jpg` | 質問がイメージになる | [Pexels](https://www.pexels.com/photo/386009/) |
+| `mag-next-49.jpg` | 計画を守るよりも重要なこと | [Pexels](https://www.pexels.com/photo/3992930/) |
+| `mag-next-50.jpg` | 実は同じ状態ですから… | [Pexels](https://www.pexels.com/photo/3769138/) |
+| `mag-next-51.jpg` | 相談された時の注意点 | [Pexels](https://www.pexels.com/photo/412840/) |
+| `mag-next-52.jpg` | うれしいご報告 | [Pexels](https://www.pexels.com/photo/412842/) |
+| `mag-next-53.jpg` | 離れるしかない | [Pexels](https://www.pexels.com/photo/415829/) |
+| `mag-next-54.jpg` | うまくいかないことのほうが自然 | [Pexels](https://www.pexels.com/photo/4275885/) |
+| `mag-next-55.jpg` | これってどういう意味ですか？ | [Pexels](https://www.pexels.com/photo/445109/) |
+| `mag-next-56.jpg` | 元カノはライバルではありません | [Pexels](https://www.pexels.com/photo/459225/) |
+| `mag-next-57.jpg` | だんだん情報を増やす | [Pexels](https://www.pexels.com/photo/462024/) |
+| `mag-next-58.jpg` | 不幸になる人、不幸にならない人 | [Pexels](https://www.pexels.com/photo/733872/) |
+| `mag-next-59.jpg` | 特に一人暮らしの方へ | [Pexels](https://www.pexels.com/photo/948873/) |
+| `mag-next-60.jpg` | できるだけ近い人 | [Pexels](https://www.pexels.com/photo/1025469/) |
+
+利用条件は[Pexelsライセンス](https://www.pexels.com/license/)に従います。
+
 ## 2011年2〜3月追加・プレビュー待ち
 
 以下の30枚は、今回追加したプレビュー待ち記事へ日付順に1枚ずつ割り当てています。既存記事と画像が重複しないことを確認済みです。すべてUnsplashの画像URLから取得しています。
